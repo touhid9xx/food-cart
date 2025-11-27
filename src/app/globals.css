@@ -1,26 +1,177 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Blue Theme */
+  --blue-neon: #00a8ff;
+  --blue-accent: #0097e6;
+  --blue-light: #e6f7ff;
+  --blue-dark: #192a56;
+  --blue-text: #2f3640;
+  
+  /* Green Theme */
+  --green-neon: #00d2a8;
+  --green-accent: #00b894;
+  --green-light: #e8f6f3;
+  --green-dark: #1e5631;
+  --green-text: #2d3436;
+  
+  /* Purple Theme */
+  --purple-neon: #9c88ff;
+  --purple-accent: #8c7ae6;
+  --purple-light: #f3e5f5;
+  --purple-dark: #341f97;
+  --purple-text: #2d3436;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Base body styles */
+body {
+  transition: all 0.3s ease;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Glassmorphism Effect */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glassmorphism {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Subtle Neon Effects */
+.neon-text {
+  text-shadow: 0 0 5px currentColor, 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.neon-glow {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+/* Theme-specific body backgrounds and text colors */
+.blue-theme {
+  --neon: var(--blue-neon);
+  --accent: var(--blue-accent);
+  --light: var(--blue-light);
+  --dark: var(--blue-dark);
+  --text: var(--blue-text);
+}
+
+.blue-theme body {
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, #e6f7ff 0%, #f0f8ff 50%, #e3f2fd 100%);
+  color: var(--blue-text);
+}
+
+.blue-theme.dark body {
+  background: linear-gradient(135deg, #0c2461 0%, #1e3799 50%, #0a3d62 100%);
+  color: #e6f7ff;
+}
+
+.green-theme {
+  --neon: var(--green-neon);
+  --accent: var(--green-accent);
+  --light: var(--green-light);
+  --dark: var(--green-dark);
+  --text: var(--green-text);
+}
+
+.green-theme body {
+  font-family: 'Poppins', 'Arial', sans-serif;
+  background: linear-gradient(135deg, #e8f6f3 0%, #f0fff4 50%, #e8fdf5 100%);
+  color: var(--green-text);
+}
+
+.green-theme.dark body {
+  background: linear-gradient(135deg, #1e5631 0%, #2d8636 50%, #1a535c 100%);
+  color: #e8f6f3;
+}
+
+.purple-theme {
+  --neon: var(--purple-neon);
+  --accent: var(--purple-accent);
+  --light: var(--purple-light);
+  --dark: var(--purple-dark);
+  --text: var(--purple-text);
+}
+
+.purple-theme body {
+  font-family: 'Montserrat', 'Verdana', sans-serif;
+  background: linear-gradient(135deg, #f3e5f5 0%, #f8f0ff 50%, #e6e6fa 100%);
+  color: var(--purple-text);
+}
+
+.purple-theme.dark body {
+  background: linear-gradient(135deg, #341f97 0%, #5f27cd 50%, #341f97 100%);
+  color: #f3e5f5;
+}
+
+/* Theme accent colors */
+.blue-theme .theme-accent {
+  color: var(--accent);
+}
+
+.green-theme .theme-accent {
+  color: var(--accent);
+}
+
+.purple-theme .theme-accent {
+  color: var(--accent);
+}
+
+.blue-theme .bg-theme-accent {
+  background-color: var(--accent);
+}
+
+.green-theme .bg-theme-accent {
+  background-color: var(--accent);
+}
+
+.purple-theme .bg-theme-accent {
+  background-color: var(--accent);
+}
+
+/* Button styles with subtle neon */
+.theme-button {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1), 0 0 15px var(--neon);
+}
+
+.theme-button:hover {
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2), 0 0 25px var(--neon);
+  transform: translateY(-2px);
+}
+
+/* Glassmorphism card hover effects */
+.glassmorphism:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+/* Navbar and footer specific styles */
+nav.glassmorphism, footer.glassmorphism {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px);
+}
+
+.dark nav.glassmorphism, .dark footer.glassmorphism {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .glassmorphism {
+    backdrop-filter: blur(8px);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Smooth transitions for all interactive elements */
+* {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              transform 0.3s ease,
+              box-shadow 0.3s ease;
 }
