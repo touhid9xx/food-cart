@@ -2,15 +2,19 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import themeSlice from "./slices/themeSlice";
+import menuSlice from "./slices/menuSlice";
+import cartSlice from "./slices/cartSlice";
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["theme"],
+  whitelist: ["theme", "cart"], // Only persist theme and cart
 };
 
 const rootReducer = combineReducers({
   theme: themeSlice,
+  menu: menuSlice,
+  cart: cartSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Inter, Poppins, Montserrat } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "./store/provider";
-import ThemeProvider from "../../public/components/ThemeProvider";
+import ThemeProvider from "./components/ThemeProvider";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import CartSidebar from "./components/CartSidebar";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const poppins = Poppins({
@@ -32,7 +35,14 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <StoreProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <div className="min-h-screen flex flex-col">
+              <Navbar />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <CartSidebar />
+            </div>
+          </ThemeProvider>
         </StoreProvider>
       </body>
     </html>
