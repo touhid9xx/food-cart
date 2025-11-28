@@ -6,6 +6,7 @@ import ThemeProvider from "./components/ThemeProvider";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import CartSidebar from "./components/CartSidebar";
+import AlertContainer from "./components/Alert/AlertContainer";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const poppins = Poppins({
@@ -38,7 +39,10 @@ export default function RootLayout({
           <ThemeProvider>
             <div className="min-h-screen flex flex-col">
               <Navbar />
-              <main className="flex-grow">{children}</main>
+              <main className="flex-grow">
+                {children}
+                <AlertContainer />
+              </main>
               <Footer />
               <CartSidebar />
             </div>

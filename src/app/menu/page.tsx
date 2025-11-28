@@ -1,16 +1,21 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useAppSelector, useAppDispatch } from "../../app/lib/hooks";
+import { useRouter } from "next/navigation";
+import { useAppSelector, useAppDispatch } from "../lib/hooks";
 import {
   fetchMenu,
   setSelectedCategory,
   setSearchQuery,
   clearFilters,
-} from "../../app/lib/slices/menuSlice";
-import { addToCart } from "../../app/lib/slices/cartSlice";
+} from "../lib/slices/menuSlice";
+import { addToCart } from "../lib/slices/cartSlice";
+import { useAlert } from "../lib/hooks/useAlert";
+import { MenuItem } from "../types";
 
 export default function Menu() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
+  const { success } = useAlert();
   const { items, categories, loading, error, selectedCategory, searchQuery } =
     useAppSelector((state) => state.menu);
   const [selectedImageIndex, setSelectedImageIndex] = useState<{
@@ -52,6 +57,16 @@ export default function Menu() {
       ...prev,
       [itemId]: index,
     }));
+  };
+
+  const handleAddToCart = (item: MenuItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    dispatch(addToCart({ menuItem: item }));
+    success(`Added ${item.name} to cart!`, "Cart Updated");
+  };
+
+  const handleItemClick = (itemId: string) => {
+    router.push(`/menu/${itemId}`);
   };
 
   const getSpiceLevel = (level: number) => {
@@ -122,7 +137,7 @@ export default function Menu() {
           </p>
         </div>
 
-        {/* Search and Filters - FIXED CONTRAST */}
+        {/* Search and Filters */}
         <div className="glassmorphism rounded-2xl p-6 backdrop-blur-lg border border-white/30 neon-glow mb-8 animate-fade-in-up delay-200">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* Search */}
@@ -151,7 +166,7 @@ export default function Menu() {
               </div>
             </div>
 
-            {/* Category Filter - FIXED: Better contrast for light mode */}
+            {/* Category Filter */}
             <div className="flex flex-wrap gap-2 justify-center">
               <button
                 onClick={() => dispatch(clearFilters())}
@@ -192,9 +207,10 @@ export default function Menu() {
             return (
               <div
                 key={item.id}
-                className="group relative"
+                className="group relative cursor-pointer"
                 onMouseEnter={() => setHoveredItem(item.id)}
                 onMouseLeave={() => setHoveredItem(null)}
+                onClick={() => handleItemClick(item.id)}
               >
                 {/* Animated Card */}
                 <div
@@ -218,10 +234,11 @@ export default function Menu() {
                   <div className="relative mb-4 overflow-hidden rounded-xl">
                     {/* Clickable Image Area */}
                     <div
-                      className="relative cursor-pointer"
-                      onClick={() =>
-                        handleImageClick(item.id, currentImageIndex)
-                      }
+                      className="relative"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageClick(item.id, currentImageIndex);
+                      }}
                     >
                       <img
                         src={currentImage}
@@ -236,11 +253,11 @@ export default function Menu() {
                         `}
                       />
 
-                      {/* Image Overlay - Make sure it doesn't block clicks */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-xl pointer-events-none" />
+                      {/* Image Overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-xl" />
                     </div>
 
-                    {/* Image Indicator Dots - Positioned absolutely but clickable */}
+                    {/* Image Indicator Dots */}
                     <div className="absolute bottom-3 left-3 flex space-x-1 backdrop-blur-sm bg-black/50 rounded-full px-2 py-1">
                       {[0, 1, 2].map((dotIndex) => (
                         <button
@@ -256,23 +273,20 @@ export default function Menu() {
                     </div>
 
                     {/* Rating Badge */}
-                    <div className="absolute top-3 right-3 bg-black/70 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300 pointer-events-none">
+                    <div className="absolute top-3 right-3 bg-black/70 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
                       {getStarRating(item.rating)}
                     </div>
 
                     {/* Spice Level Badge */}
                     {item.spiceLevel > 0 && (
-                      <div className="absolute top-3 left-3 bg-red-500/90 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300 pointer-events-none">
+                      <div className="absolute top-3 left-3 bg-red-500/90 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
                         {getSpiceLevel(item.spiceLevel)}
                       </div>
                     )}
 
                     {/* Quick Add Button */}
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        dispatch(addToCart({ menuItem: item }));
-                      }}
+                      onClick={(e) => handleAddToCart(item, e)}
                       disabled={!item.isAvailable}
                       className={`
                         absolute bottom-3 right-3 bg-theme-accent text-white px-4 py-2 rounded-full 
@@ -294,7 +308,7 @@ export default function Menu() {
                     </button>
 
                     {/* Image Counter */}
-                    <div className="absolute top-3 left-12 bg-black/50 text-white px-2 py-1 rounded-full text-xs backdrop-blur-sm pointer-events-none">
+                    <div className="absolute top-3 left-12 bg-black/50 text-white px-2 py-1 rounded-full text-xs backdrop-blur-sm">
                       {currentImageIndex + 1}/3
                     </div>
                   </div>
@@ -332,7 +346,7 @@ export default function Menu() {
 
                     {/* Add to Cart Button */}
                     <button
-                      onClick={() => dispatch(addToCart({ menuItem: item }))}
+                      onClick={(e) => handleAddToCart(item, e)}
                       disabled={!item.isAvailable}
                       className={`
                         w-full py-3 rounded-xl font-semibold transition-all duration-300 

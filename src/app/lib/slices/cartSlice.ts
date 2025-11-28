@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CartItem, CartState, MenuItem } from "../../types";
+import { CartState, CartItem, MenuItem } from "../../types";
 
 const initialState: CartState = {
   items: [],
@@ -14,26 +14,36 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (
       state,
-      action: PayloadAction<{ menuItem: MenuItem; quantity?: number }>
+      action: PayloadAction<{
+        menuItem: MenuItem;
+        quantity?: number;
+        specialInstructions?: string;
+      }>
     ) => {
-      const { menuItem, quantity = 1 } = action.payload;
+      const { menuItem, quantity = 1, specialInstructions } = action.payload;
+
       const existingItem = state.items.find(
-        (item) => item.menuItemId === menuItem.id
+        (item) =>
+          item.menuItemId === menuItem.id &&
+          item.specialInstructions === specialInstructions
       );
 
       if (existingItem) {
         existingItem.quantity += quantity;
       } else {
-        state.items.push({
+        const newItem: CartItem = {
           id: `${menuItem.id}-${Date.now()}`,
           menuItemId: menuItem.id,
           name: menuItem.name,
           price: menuItem.price,
           quantity,
           image: menuItem.image,
-        });
+          specialInstructions,
+        };
+        state.items.push(newItem);
       }
 
+      // Update totals
       state.itemCount = state.items.reduce(
         (total, item) => total + item.quantity,
         0
@@ -46,6 +56,8 @@ const cartSlice = createSlice({
 
     removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
+
+      // Update totals
       state.itemCount = state.items.reduce(
         (total, item) => total + item.quantity,
         0
@@ -64,13 +76,15 @@ const cartSlice = createSlice({
       const item = state.items.find((item) => item.id === id);
 
       if (item) {
-        if (quantity <= 0) {
+        item.quantity = Math.max(0, quantity);
+
+        // Remove item if quantity is 0
+        if (item.quantity === 0) {
           state.items = state.items.filter((item) => item.id !== id);
-        } else {
-          item.quantity = quantity;
         }
       }
 
+      // Update totals
       state.itemCount = state.items.reduce(
         (total, item) => total + item.quantity,
         0

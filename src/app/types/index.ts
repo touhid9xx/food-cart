@@ -21,6 +21,57 @@ export interface MenuItem {
   dietaryInfo?: DietaryInfo;
 }
 
+export interface MenuItemDetails extends MenuItem {
+  nutritionalInfo?: NutritionalInfo;
+  allergens: string[];
+  cookingInstructions?: string;
+  servingSize: string;
+  customizationOptions: CustomizationOption[];
+  deals: Deal[];
+  relatedItems: string[];
+  popularityScore: number;
+  tags: string[];
+  chefRecommendation: boolean;
+  seasonal: boolean;
+}
+
+export interface NutritionalInfo {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  sugar: number;
+  sodium: number;
+}
+
+export interface CustomizationOption {
+  id: string;
+  name: string;
+  type: "radio" | "checkbox" | "number";
+  options: CustomizationChoice[];
+  required: boolean;
+  maxSelections?: number;
+}
+
+export interface CustomizationChoice {
+  id: string;
+  name: string;
+  price: number;
+  available: boolean;
+}
+
+export interface Deal {
+  id: string;
+  name: string;
+  type: "percentage" | "fixed" | "bogo" | "combo";
+  value: number;
+  description: string;
+  validUntil?: string;
+  minOrderAmount?: number;
+  applicableItems: string[];
+}
+
 export interface DietaryInfo {
   isVegetarian: boolean;
   isVegan: boolean;
@@ -34,6 +85,19 @@ export interface DietaryInfo {
 export interface MenuResponse {
   categories: string[];
   items: MenuItem[];
+}
+
+export interface MenuItemReview {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  helpful: number;
+  images?: string[];
+  verifiedPurchase: boolean;
 }
 
 // Cart Types
@@ -189,6 +253,48 @@ export interface DietaryRestriction {
   description?: string;
 }
 
+// Auth Types
+export interface AuthState {
+  user: User | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: "customer" | "admin" | "staff";
+  avatar?: string;
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
 // API Response Types
 export interface ApiResponse<T> {
   success: boolean;
@@ -223,4 +329,28 @@ export interface Notification {
   isRead: boolean;
   createdAt: string;
   orderId?: string;
+}
+
+// Alert Types
+export type AlertType = "success" | "error" | "warning" | "info";
+
+export interface Alert {
+  id: string;
+  type: AlertType;
+  title?: string;
+  message: string;
+  duration?: number;
+  timestamp: number;
+}
+
+export interface AlertState {
+  alerts: Alert[];
+  position:
+    | "top-right"
+    | "top-left"
+    | "bottom-right"
+    | "bottom-left"
+    | "top-center"
+    | "bottom-center";
+  maxAlerts: number;
 }
