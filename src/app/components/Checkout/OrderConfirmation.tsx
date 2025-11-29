@@ -1,41 +1,25 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "../../lib/hooks";
 import { resetCheckout } from "../../lib/slices/checkoutSlice";
-
-// Move impure functions outside the component
-const generateOrderId = () => {
-  return `ORD-${Date.now()}-${Math.random()
-    .toString(36)
-    .substr(2, 9)
-    .toUpperCase()}`;
-};
-
-const getEstimatedDelivery = () => {
-  return new Date(Date.now() + 45 * 60000).toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-};
 
 export default function OrderConfirmation() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  // Get all data from checkout state (including orderTotal that we stored earlier)
+  // Get orderTotal from checkout state (not cart state)
   const { orderId, paymentMethod, shippingAddress, orderTotal } =
     useAppSelector((state) => state.checkout);
 
-  // Use useMemo with stable values - no impure functions inside
-  const { displayOrderId, estimatedDelivery } = useMemo(() => {
-    return {
-      displayOrderId: orderId || generateOrderId(),
-      estimatedDelivery: getEstimatedDelivery(),
-    };
-  }, [orderId]); // Only depend on orderId
+  // Calculate delivery time safely
+  const deliveryTime = new Date();
+  deliveryTime.setMinutes(deliveryTime.getMinutes() + 45);
+  const estimatedDelivery = deliveryTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 
   const handleNewOrder = () => {
     dispatch(resetCheckout());
@@ -67,7 +51,9 @@ export default function OrderConfirmation() {
         <div className="space-y-3 text-left">
           <div className="flex justify-between">
             <span className="font-semibold">Order ID:</span>
-            <span className="theme-accent font-mono">{displayOrderId}</span>
+            <span className="theme-accent font-mono">
+              {orderId || "ORD-123456789"}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Payment Method:</span>
