@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
-import { useAppSelector, useAppDispatch } from "../../lib/hooks";
-import { removeAlert } from "../../lib/slices/alertSlice";
+import { useAppSelector, useAppDispatch } from "../../../store/hooks";
+import { removeAlert } from "../../../lib/slices/alertSlice";
 import Alert from "./Alert";
 
 export default function AlertContainer() {

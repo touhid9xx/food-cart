@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "../lib/hooks";
-import { logoutUser } from "../lib/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { logoutUser } from "../../lib/slices/authSlice";
 
 export default function NavigationMenu() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

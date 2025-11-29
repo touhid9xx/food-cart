@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
-import { useAppSelector, useAppDispatch } from "../lib/hooks";
-import { toggleCart } from "../lib/slices/cartSlice";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import { toggleCart } from "../../lib/slices/cartSlice";
 
 // Export the function to get cart icon position first
 export const getCartIconPosition = () => {

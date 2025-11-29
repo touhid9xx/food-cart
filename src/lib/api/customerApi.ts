@@ -9,7 +9,7 @@ import {
   DietaryRestriction,
   CustomerPreferences,
 } from "../../types";
-import { CrudService, ApiResponseBuilder } from "./apiUtils";
+import { CrudService, ApiResponseBuilder } from "../utils/apiUtils";
 
 // Enhanced fake customer data
 const fakeCustomers: Customer[] = [

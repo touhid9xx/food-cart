@@ -378,3 +378,70 @@ export interface CheckoutState {
   orderId: string | null;
   isLoading: boolean;
 }
+
+// Add these Order Summary types to your existing types file
+
+// Order Summary Types for Dashboard
+export interface OrderSummary {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  items: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+    price: number;
+  }>;
+  total: number;
+  status: "pending" | "confirmed" | "preparing" | "ready" | "out_for_delivery" | "delivered" | "cancelled";
+  orderDate: string;
+  estimatedDelivery: string;
+  deliveryAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  paymentMethod: "cash" | "card" | "digital_wallet";
+  paymentStatus: "pending" | "paid" | "failed" | "refunded";
+  specialInstructions?: string;
+  dietaryRequirements?: string;
+  restaurant: {
+    id: string;
+    name: string;
+  };
+  deliveryDriver?: {
+    id: string;
+    name: string;
+    phone: string;
+  };
+}
+
+export interface OrderSummaryState {
+  orders: OrderSummary[];
+  filteredOrders: OrderSummary[];
+  loading: boolean;
+  error: string | null;
+  searchTerm: string;
+  dateFilter: {
+    startDate: string | null;
+    endDate: string | null;
+  };
+  statusFilter: string | null;
+}
+
+export interface OrderSearchCriteria {
+  searchTerm?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  customerName?: string;
+  orderId?: string;
+}
+
+export interface UpdateOrderStatusPayload {
+  orderId: string;
+  status: OrderSummary["status"];
+}

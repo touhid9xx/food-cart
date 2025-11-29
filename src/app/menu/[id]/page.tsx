@@ -3,19 +3,19 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAppDispatch } from "../../lib/hooks";
-import { addToCart } from "../../lib/slices/cartSlice";
-import { useAlert } from "../../lib/hooks/useAlert";
+import { useAppDispatch } from "../../../store/hooks";
+import { addToCart } from "../../../lib/slices/cartSlice";
+import { useAlert } from "../../../lib/hooks/useAlert";
 import { useFlyingItems } from "../../components/Animation/FlyingItemsProvider";
-import { enhancedMenuApi } from "../../lib/api/enhancedMenuApi";
+import { enhancedMenuApi } from "../../../lib/api/enhancedMenuApi";
 import {
   MenuItemDetails,
   MenuItemReview,
   Deal,
   CustomizationOption,
   MenuItem,
-} from "../../types";
-import { getCartIconPosition } from "../../components/CartIcon"; // Fixed import
+} from "../../../types";
+import { getCartIconPosition } from "../../components/CartIcon";
 
 export default function MenuItemPage() {
   const params = useParams();
@@ -78,6 +78,18 @@ export default function MenuItemPage() {
       setMenuItem(itemData);
       setReviews(reviewsData);
       setRelatedItems(relatedData as MenuItemDetails[]);
+
+      // Initialize required customizations
+      const initialCustomizations: { [key: string]: string[] | number } = {};
+      itemData.customizationOptions
+        .filter(
+          (opt) =>
+            opt.required && opt.type === "radio" && opt.options.length > 0
+        )
+        .forEach((opt) => {
+          initialCustomizations[opt.id] = [opt.options[0].id];
+        });
+      setCustomizations(initialCustomizations);
     } catch (err) {
       error("Failed to load menu item", "Error");
     } finally {
@@ -141,6 +153,27 @@ export default function MenuItemPage() {
   const handleAddToCart = () => {
     if (!menuItem) return;
 
+    // Validate required customizations
+    const missingRequired = menuItem.customizationOptions
+      .filter((opt) => opt.required)
+      .filter((opt) => {
+        if (opt.type === "radio") {
+          return (
+            !customizations[opt.id] ||
+            (customizations[opt.id] as string[]).length === 0
+          );
+        }
+        return false;
+      });
+
+    if (missingRequired.length > 0) {
+      error(
+        `Please select ${missingRequired.map((opt) => opt.name).join(", ")}`,
+        "Customization Required"
+      );
+      return;
+    }
+
     // Get the add to cart button position
     if (addToCartButtonRef.current) {
       const buttonRect = addToCartButtonRef.current.getBoundingClientRect();
@@ -158,7 +191,7 @@ export default function MenuItemPage() {
       id: menuItem.id,
       name: menuItem.name,
       description: menuItem.description,
-      price: calculateTotalPrice() / quantity,
+      price: calculateTotalPrice() / quantity, // Price per item
       image: menuItem.image,
       images: menuItem.images,
       category: menuItem.category,
@@ -205,7 +238,7 @@ export default function MenuItemPage() {
             {option.options.map((choice) => (
               <label
                 key={choice.id}
-                className="flex items-center gap-3 cursor-pointer"
+                className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <input
                   type="radio"
@@ -220,11 +253,18 @@ export default function MenuItemPage() {
                   }
                   className="text-theme-accent focus:ring-theme-accent"
                   disabled={!choice.available}
+                  required={option.required}
                 />
                 <span className="flex-1">{choice.name}</span>
-                {choice.price > 0 && (
-                  <span className="text-theme-accent font-semibold">
-                    +${choice.price.toFixed(2)}
+                {choice.price !== 0 && (
+                  <span
+                    className={`font-semibold ${
+                      choice.price > 0 ? "text-theme-accent" : "text-green-600"
+                    }`}
+                  >
+                    {choice.price > 0
+                      ? `+$${choice.price.toFixed(2)}`
+                      : `-$${Math.abs(choice.price).toFixed(2)}`}
                   </span>
                 )}
                 {!choice.available && (
@@ -241,7 +281,7 @@ export default function MenuItemPage() {
             {option.options.map((choice) => (
               <label
                 key={choice.id}
-                className="flex items-center gap-3 cursor-pointer"
+                className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <input
                   type="checkbox"
@@ -257,9 +297,15 @@ export default function MenuItemPage() {
                   disabled={!choice.available}
                 />
                 <span className="flex-1">{choice.name}</span>
-                {choice.price > 0 && (
-                  <span className="text-theme-accent font-semibold">
-                    +${choice.price.toFixed(2)}
+                {choice.price !== 0 && (
+                  <span
+                    className={`font-semibold ${
+                      choice.price > 0 ? "text-theme-accent" : "text-green-600"
+                    }`}
+                  >
+                    {choice.price > 0
+                      ? `+$${choice.price.toFixed(2)}`
+                      : `-$${Math.abs(choice.price).toFixed(2)}`}
                   </span>
                 )}
                 {!choice.available && (
@@ -274,7 +320,7 @@ export default function MenuItemPage() {
         const currentValue = (customizations[option.id] as number) || 0;
         const choice = option.options[0]; // Usually only one option for number type
         return (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 p-2">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -285,7 +331,7 @@ export default function MenuItemPage() {
                     "number"
                   )
                 }
-                className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100"
+                className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 transition-colors"
                 disabled={!choice?.available}
               >
                 -
@@ -302,7 +348,7 @@ export default function MenuItemPage() {
                     "number"
                   )
                 }
-                className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100"
+                className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 transition-colors"
                 disabled={!choice?.available}
               >
                 +
@@ -311,9 +357,15 @@ export default function MenuItemPage() {
             {choice && (
               <div className="flex-1">
                 <span className="text-sm text-gray-600">{choice.name}</span>
-                {choice.price > 0 && (
-                  <span className="text-theme-accent font-semibold ml-2">
-                    +${choice.price.toFixed(2)} each
+                {choice.price !== 0 && (
+                  <span
+                    className={`font-semibold ml-2 ${
+                      choice.price > 0 ? "text-theme-accent" : "text-green-600"
+                    }`}
+                  >
+                    {choice.price > 0
+                      ? `+$${choice.price.toFixed(2)} each`
+                      : `-$${Math.abs(choice.price).toFixed(2)} each`}
                   </span>
                 )}
               </div>
@@ -399,6 +451,11 @@ export default function MenuItemPage() {
                     {getSpiceLevel(menuItem.spiceLevel)}
                   </span>
                 )}
+                {menuItem.deals.length > 0 && (
+                  <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    🎁 Deals Available
+                  </span>
+                )}
               </div>
 
               {/* Rating Badge */}
@@ -408,25 +465,27 @@ export default function MenuItemPage() {
             </div>
 
             {/* Thumbnail Images */}
-            <div className="grid grid-cols-3 gap-2">
-              {menuItem.images?.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`rounded-lg overflow-hidden border-2 transition-all ${
-                    selectedImageIndex === index
-                      ? "border-theme-accent scale-105"
-                      : "border-transparent hover:border-gray-300"
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${menuItem.name} view ${index + 1}`}
-                    className="w-full h-24 object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+            {menuItem.images && menuItem.images.length > 1 && (
+              <div className="grid grid-cols-3 gap-2">
+                {menuItem.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`rounded-lg overflow-hidden border-2 transition-all ${
+                      selectedImageIndex === index
+                        ? "border-theme-accent scale-105"
+                        : "border-transparent hover:border-gray-300"
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${menuItem.name} view ${index + 1}`}
+                      className="w-full h-24 object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Details */}
@@ -480,25 +539,39 @@ export default function MenuItemPage() {
                   🎁 Special Offers
                 </h3>
                 {menuItem.deals.map((deal) => (
-                  <div key={deal.id} className="text-sm text-blue-700">
+                  <div
+                    key={deal.id}
+                    className="text-sm text-blue-700 mb-2 last:mb-0"
+                  >
                     <strong>{deal.name}:</strong> {deal.description}
+                    {deal.validUntil && (
+                      <div className="text-xs text-blue-600 mt-1">
+                        Valid until:{" "}
+                        {new Date(deal.validUntil).toLocaleDateString()}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             )}
 
             {/* Customizations */}
-            {menuItem.customizationOptions.map((option) => (
-              <div key={option.id} className="border rounded-lg p-4">
-                <h4 className="font-semibold mb-3">
-                  {option.name}
-                  {option.required && (
-                    <span className="text-red-500 ml-1">*</span>
-                  )}
-                </h4>
-                {renderCustomizationOption(option)}
+            {menuItem.customizationOptions.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold">Customize Your Order</h3>
+                {menuItem.customizationOptions.map((option) => (
+                  <div key={option.id} className="border rounded-lg p-4">
+                    <h4 className="font-semibold mb-3">
+                      {option.name}
+                      {option.required && (
+                        <span className="text-red-500 ml-1">*</span>
+                      )}
+                    </h4>
+                    {renderCustomizationOption(option)}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
 
             {/* Quantity and Add to Cart */}
             <div className="space-y-4">
@@ -507,7 +580,7 @@ export default function MenuItemPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100"
+                    className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 transition-colors"
                   >
                     -
                   </button>
@@ -516,7 +589,7 @@ export default function MenuItemPage() {
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100"
+                    className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100 transition-colors"
                   >
                     +
                   </button>
@@ -529,7 +602,7 @@ export default function MenuItemPage() {
                 disabled={!menuItem.isAvailable}
                 className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
                   menuItem.isAvailable
-                    ? "theme-button hover:scale-105"
+                    ? "theme-button hover:scale-105 hover:shadow-xl"
                     : "bg-gray-400 text-gray-200 cursor-not-allowed"
                 }`}
               >
@@ -616,6 +689,16 @@ export default function MenuItemPage() {
                     )}
                   </div>
                 </div>
+                {menuItem.cookingInstructions && (
+                  <div className="md:col-span-2">
+                    <h3 className="text-xl font-semibold mb-4">
+                      Cooking Instructions
+                    </h3>
+                    <p className="text-gray-700">
+                      {menuItem.cookingInstructions}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -704,17 +787,25 @@ export default function MenuItemPage() {
                   <Link
                     key={item.id}
                     href={`/menu/${item.id}`}
-                    className="block border rounded-lg p-4 hover:shadow-lg transition-all"
+                    className="block border rounded-lg p-4 hover:shadow-lg transition-all group"
                   >
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-32 object-cover rounded mb-3"
+                      className="w-full h-32 object-cover rounded mb-3 group-hover:scale-105 transition-transform"
                     />
-                    <h4 className="font-semibold theme-accent">{item.name}</h4>
+                    <h4 className="font-semibold theme-accent group-hover:underline">
+                      {item.name}
+                    </h4>
                     <p className="text-sm text-gray-600">
                       ${item.price.toFixed(2)}
                     </p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-yellow-500">⭐</span>
+                      <span className="text-sm text-gray-600">
+                        {item.rating}
+                      </span>
+                    </div>
                   </Link>
                 ))}
               </div>

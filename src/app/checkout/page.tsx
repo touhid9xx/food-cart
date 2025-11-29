@@ -1,9 +1,9 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAppSelector, useAppDispatch } from "../lib/hooks";
-import { closeCart } from "../lib/slices/cartSlice";
-import { setCheckoutStep } from "../lib/slices/checkoutSlice";
+import { useAppSelector, useAppDispatch } from "../../lib/hooks";
+import { closeCart } from "../../lib/slices/cartSlice";
+import { setCheckoutStep } from "../../lib/slices/checkoutSlice";
 import CartReview from "../components/Checkout/CartReview";
 import ShippingDetails from "../components/Checkout/ShippingDetails";
 import PaymentMethod from "../components/Checkout/PaymentMethod";
