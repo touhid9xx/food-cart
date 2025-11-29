@@ -7,7 +7,7 @@ import { useAppDispatch } from "../../../store/hooks";
 import { addToCart } from "../../../lib/slices/cartSlice";
 import { useAlert } from "../../../lib/hooks/useAlert";
 import { useFlyingItems } from "../../components/Animation/FlyingItemsProvider";
-import { enhancedMenuApi } from "../../../lib/api/enhancedMenuApi";
+import { menuApi } from "../../../lib/api/menuApi";
 import {
   MenuItemDetails,
   MenuItemReview,
@@ -64,9 +64,9 @@ export default function MenuItemPage() {
     try {
       setLoading(true);
       const [itemData, reviewsData, relatedData] = await Promise.all([
-        enhancedMenuApi.fetchMenuItemById(itemId),
-        enhancedMenuApi.fetchMenuItemReviews(itemId),
-        enhancedMenuApi.fetchRelatedItems(itemId),
+        menuApi.fetchMenuItemById(itemId),
+        menuApi.fetchMenuItemReviews(itemId),
+        menuApi.fetchRelatedItems(itemId),
       ]);
 
       if (!itemData) {

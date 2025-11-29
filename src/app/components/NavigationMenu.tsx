@@ -72,7 +72,7 @@ export default function NavigationMenu() {
     { name: "Order Summary", href: "/dashboard/orders" },
     { name: "Sales", href: "/dashboard/sales" },
     { name: "Inventory", href: "/dashboard/inventory" },
-    { name: "Report", href: "/dashboard/report" },
+    { name: "Menu Management", href: "/dashboard/edit-menu" },
     { name: "User Management", href: "/dashboard/users" },
   ];
 
