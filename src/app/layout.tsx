@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import CartSidebar from "./components/CartSidebar";
 import AlertContainer from "./components/Alert/AlertContainer";
+import FlyingItemsProvider from "./components/Animation/FlyingItemsProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const poppins = Poppins({
@@ -40,8 +41,10 @@ export default function RootLayout({
             <div className="min-h-screen flex flex-col">
               <Navbar />
               <main className="flex-grow">
-                {children}
-                <AlertContainer />
+                <FlyingItemsProvider>
+                  {children}
+                  <AlertContainer />
+                </FlyingItemsProvider>
               </main>
               <Footer />
               <CartSidebar />

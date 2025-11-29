@@ -6,6 +6,7 @@ import menuSlice from "./slices/menuSlice";
 import cartSlice from "./slices/cartSlice";
 import authSlice from "./slices/authSlice";
 import alertSlice from "./slices/alertSlice"; // Add this
+import checkoutReducer from "./slices/checkoutSlice"; // Add this
 
 const persistConfig = {
   key: "root",
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   cart: cartSlice,
   auth: authSlice, // Add auth reducer
   alert: alertSlice, // Add this
+  checkout: checkoutReducer, // Add this
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

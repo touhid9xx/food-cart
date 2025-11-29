@@ -354,3 +354,27 @@ export interface AlertState {
     | "bottom-center";
   maxAlerts: number;
 }
+
+
+// Add these to your existing types
+
+export interface CheckoutState {
+  step: 'cart' | 'details' | 'payment' | 'confirmation';
+  shippingAddress: {
+    fullName: string;
+    address: string;
+    city: string;
+    postalCode: string;
+    phone: string;
+    instructions: string;
+  };
+  paymentMethod: 'cash' | 'card' | null;
+  cardDetails: {
+    number: string;
+    expiry: string;
+    cvv: string;
+    name: string;
+  };
+  orderId: string | null;
+  isLoading: boolean;
+}
