@@ -1,13 +1,33 @@
 "use client";
+import { useRef } from "react";
 import { useAppSelector, useAppDispatch } from "../lib/hooks";
 import { toggleCart } from "../lib/slices/cartSlice";
+
+// Export the function to get cart icon position first
+export const getCartIconPosition = () => {
+  if (typeof document !== "undefined") {
+    const cartIcon = document.querySelector(
+      '[aria-label="Shopping cart"]'
+    ) as HTMLElement;
+    if (cartIcon) {
+      const rect = cartIcon.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+    }
+  }
+  return { x: 50, y: 50 }; // Default position
+};
 
 export default function CartIcon() {
   const dispatch = useAppDispatch();
   const { itemCount } = useAppSelector((state) => state.cart);
+  const cartIconRef = useRef<HTMLButtonElement>(null);
 
   return (
     <button
+      ref={cartIconRef}
       onClick={() => dispatch(toggleCart())}
       className="relative p-2 rounded-lg hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white"
       aria-label="Shopping cart"

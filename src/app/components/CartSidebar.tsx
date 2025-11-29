@@ -6,11 +6,11 @@ import {
   updateQuantity,
   clearCart,
 } from "../lib/slices/cartSlice";
-
+import { useRouter } from "next/navigation";
 export default function CartSidebar() {
   const dispatch = useAppDispatch();
   const { items, total, isOpen } = useAppSelector((state) => state.cart);
-
+  const router = useRouter();
   if (!isOpen) return null;
 
   return (
@@ -152,7 +152,13 @@ export default function CartSidebar() {
                 >
                   Clear Cart
                 </button>
-                <button className="flex-1 px-4 py-3 bg-theme-accent text-white rounded-lg hover:opacity-90 transition-opacity font-semibold">
+                <button
+                  onClick={() => {
+                    dispatch(closeCart());
+                    router.push("/checkout");
+                  }}
+                  className="flex-1 px-4 py-3 bg-theme-accent text-white rounded-lg hover:opacity-90 transition-opacity font-semibold"
+                >
                   Checkout
                 </button>
               </div>

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "../lib/hooks";
 import {
@@ -10,12 +10,15 @@ import {
 } from "../lib/slices/menuSlice";
 import { addToCart } from "../lib/slices/cartSlice";
 import { useAlert } from "../lib/hooks/useAlert";
+import { useFlyingItems } from "../components/Animation/FlyingItemsProvider";
 import { MenuItem } from "../types";
+import { getCartIconPosition } from "../components/CartIcon"; // Fixed import
 
 export default function Menu() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { success } = useAlert();
+  const { flyItem } = useFlyingItems();
   const { items, categories, loading, error, selectedCategory, searchQuery } =
     useAppSelector((state) => state.menu);
   const [selectedImageIndex, setSelectedImageIndex] = useState<{
@@ -23,8 +26,28 @@ export default function Menu() {
   }>({});
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
+  // Ref for cart icon position
+  const cartIconPosition = useRef({ x: 50, y: 50 });
+
   useEffect(() => {
     dispatch(fetchMenu());
+
+    // Update cart icon position using the exported function
+    const updateCartPosition = () => {
+      const position = getCartIconPosition();
+      cartIconPosition.current = position;
+    };
+
+    // Initial position
+    setTimeout(updateCartPosition, 100);
+
+    // Update on resize and scroll
+    window.addEventListener("resize", updateCartPosition);
+    window.addEventListener("scroll", updateCartPosition);
+    return () => {
+      window.removeEventListener("resize", updateCartPosition);
+      window.removeEventListener("scroll", updateCartPosition);
+    };
   }, [dispatch]);
 
   const filteredItems = items.filter((item) => {
@@ -43,7 +66,7 @@ export default function Menu() {
   const handleImageClick = (itemId: string, currentIndex: number) => {
     setSelectedImageIndex((prev) => ({
       ...prev,
-      [itemId]: (currentIndex + 1) % 3, // Cycle through 3 images
+      [itemId]: (currentIndex + 1) % 3,
     }));
   };
 
@@ -52,7 +75,7 @@ export default function Menu() {
     index: number,
     e: React.MouseEvent
   ) => {
-    e.stopPropagation(); // Prevent triggering the image click
+    e.stopPropagation();
     setSelectedImageIndex((prev) => ({
       ...prev,
       [itemId]: index,
@@ -61,8 +84,22 @@ export default function Menu() {
 
   const handleAddToCart = (item: MenuItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch(addToCart({ menuItem: item }));
-    success(`Added ${item.name} to cart!`, "Cart Updated");
+
+    // Get the clicked button position
+    const buttonRect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const startPosition = {
+      x: buttonRect.left + buttonRect.width / 2,
+      y: buttonRect.top + buttonRect.height / 2,
+    };
+
+    // Trigger flying animation
+    flyItem(startPosition, cartIconPosition.current, item.image);
+
+    // Add to cart after a small delay for better visual effect
+    setTimeout(() => {
+      dispatch(addToCart({ menuItem: item }));
+      success(`Added ${item.name} to cart!`, "Cart Updated");
+    }, 300);
   };
 
   const handleItemClick = (itemId: string) => {

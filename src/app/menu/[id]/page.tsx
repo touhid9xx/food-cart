@@ -1,11 +1,12 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAppDispatch, useAppSelector } from "../../lib/hooks";
+import { useAppDispatch } from "../../lib/hooks";
 import { addToCart } from "../../lib/slices/cartSlice";
 import { useAlert } from "../../lib/hooks/useAlert";
+import { useFlyingItems } from "../../components/Animation/FlyingItemsProvider";
 import { enhancedMenuApi } from "../../lib/api/enhancedMenuApi";
 import {
   MenuItemDetails,
@@ -14,12 +15,14 @@ import {
   CustomizationOption,
   MenuItem,
 } from "../../types";
+import { getCartIconPosition } from "../../components/CartIcon"; // Fixed import
 
 export default function MenuItemPage() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { success, error } = useAlert();
+  const { flyItem } = useFlyingItems();
 
   const itemId = params.id as string;
   const [menuItem, setMenuItem] = useState<MenuItemDetails | null>(null);
@@ -33,8 +36,28 @@ export default function MenuItemPage() {
   }>({});
   const [activeTab, setActiveTab] = useState("details");
 
+  const addToCartButtonRef = useRef<HTMLButtonElement>(null);
+  const cartIconPosition = useRef({ x: 50, y: 50 });
+
   useEffect(() => {
     loadMenuItemData();
+
+    // Update cart icon position using the exported function
+    const updateCartPosition = () => {
+      const position = getCartIconPosition();
+      cartIconPosition.current = position;
+    };
+
+    // Initial position
+    setTimeout(updateCartPosition, 100);
+
+    // Update on resize and scroll
+    window.addEventListener("resize", updateCartPosition);
+    window.addEventListener("scroll", updateCartPosition);
+    return () => {
+      window.removeEventListener("resize", updateCartPosition);
+      window.removeEventListener("scroll", updateCartPosition);
+    };
   }, [itemId]);
 
   const loadMenuItemData = async () => {
@@ -118,12 +141,24 @@ export default function MenuItemPage() {
   const handleAddToCart = () => {
     if (!menuItem) return;
 
-    // Convert MenuItemDetails to basic MenuItem for cart
+    // Get the add to cart button position
+    if (addToCartButtonRef.current) {
+      const buttonRect = addToCartButtonRef.current.getBoundingClientRect();
+      const startPosition = {
+        x: buttonRect.left + buttonRect.width / 2,
+        y: buttonRect.top + buttonRect.height / 2,
+      };
+
+      // Trigger flying animation
+      flyItem(startPosition, cartIconPosition.current, menuItem.image);
+    }
+
+    // Convert MenuItemDetails to basic MenuItem for cart and add to cart
     const menuItemForCart: MenuItem = {
       id: menuItem.id,
       name: menuItem.name,
       description: menuItem.description,
-      price: calculateTotalPrice() / quantity, // Price per item
+      price: calculateTotalPrice() / quantity,
       image: menuItem.image,
       images: menuItem.images,
       category: menuItem.category,
@@ -135,21 +170,22 @@ export default function MenuItemPage() {
       dietaryInfo: menuItem.dietaryInfo,
     };
 
-    // Prepare special instructions from customizations
     const specialInstructions =
       Object.keys(customizations).length > 0
         ? `Customizations: ${JSON.stringify(customizations)}`
         : undefined;
 
-    dispatch(
-      addToCart({
-        menuItem: menuItemForCart,
-        quantity,
-        specialInstructions,
-      })
-    );
-
-    success(`Added ${quantity} ${menuItem.name} to cart!`, "Added to Cart");
+    // Add to cart after a small delay for better visual effect
+    setTimeout(() => {
+      dispatch(
+        addToCart({
+          menuItem: menuItemForCart,
+          quantity,
+          specialInstructions,
+        })
+      );
+      success(`Added ${quantity} ${menuItem.name} to cart!`, "Added to Cart");
+    }, 300);
   };
 
   const getStarRating = (rating: number) => {
@@ -488,6 +524,7 @@ export default function MenuItemPage() {
               </div>
 
               <button
+                ref={addToCartButtonRef}
                 onClick={handleAddToCart}
                 disabled={!menuItem.isAvailable}
                 className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
