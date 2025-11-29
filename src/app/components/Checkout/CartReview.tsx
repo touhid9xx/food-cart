@@ -1,8 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useAppSelector, useAppDispatch } from "../../lib/hooks";
-import { removeFromCart, updateQuantity } from "../../lib/slices/cartSlice";
-import { setCheckoutStep } from "../../lib/slices/checkoutSlice";
+import { useAppSelector, useAppDispatch } from "../../../lib/hooks";
+import { removeFromCart, updateQuantity } from "../../../lib/slices/cartSlice";
+import { setCheckoutStep } from "../../../lib/slices/checkoutSlice";
 
 export default function CartReview() {
   const router = useRouter();

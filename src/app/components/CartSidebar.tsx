@@ -1,11 +1,11 @@
 "use client";
-import { useAppSelector, useAppDispatch } from "../lib/hooks";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import {
   closeCart,
   removeFromCart,
   updateQuantity,
   clearCart,
-} from "../lib/slices/cartSlice";
+} from "../../lib/slices/cartSlice";
 import { useRouter } from "next/navigation";
 export default function CartSidebar() {
   const dispatch = useAppDispatch();

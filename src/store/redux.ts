@@ -1,26 +1,28 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import themeSlice from "./slices/themeSlice";
-import menuSlice from "./slices/menuSlice";
-import cartSlice from "./slices/cartSlice";
-import authSlice from "./slices/authSlice";
-import alertSlice from "./slices/alertSlice"; // Add this
-import checkoutReducer from "./slices/checkoutSlice"; // Add this
+import themeSlice from "../lib/slices/themeSlice";
+import menuSlice from "../lib/slices/menuSlice";
+import cartSlice from "../lib/slices/cartSlice";
+import authSlice from "../lib/slices/authSlice";
+import alertSlice from "../lib/slices/alertSlice"; // Add this
+import checkoutReducer from "../lib/slices/checkoutSlice"; // Add this
+import orderSummaryReducer from "../lib/slices/orderSummarySlice";
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["theme", "cart", "auth"], // Add auth to persisted state
+  whitelist: ["theme", "cart", "auth"],
 };
 
 const rootReducer = combineReducers({
   theme: themeSlice,
   menu: menuSlice,
   cart: cartSlice,
-  auth: authSlice, // Add auth reducer
-  alert: alertSlice, // Add this
-  checkout: checkoutReducer, // Add this
+  auth: authSlice,
+  alert: alertSlice,
+  checkout: checkoutReducer,
+  orderSummary: orderSummaryReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

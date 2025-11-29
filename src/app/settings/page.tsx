@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { customerApi } from "../lib/api/customerApi";
-import { Customer, CustomerPreferences } from "../types";
+import { customerApi } from "../../lib/api/customerApi";
+import { Customer, CustomerPreferences } from "../../types";
 
 // Define type for dietary restrictions
 type DietaryRestrictionType =

@@ -1,16 +1,16 @@
 "use client";
 import { useState } from "react";
-import { useAppSelector, useAppDispatch } from "../../lib/hooks";
+import { useAppSelector, useAppDispatch } from "../../../store/hooks";
 import {
   setPaymentMethod,
   updateCardDetails,
   setCheckoutStep,
   setLoading,
   setOrderTotal, // ADD THIS IMPORT
-} from "../../lib/slices/checkoutSlice";
-import { clearCart } from "../../lib/slices/cartSlice";
-import { checkoutApi } from "../../lib/api/checkoutApi";
-import { useAlert } from "../../lib/hooks/useAlert";
+} from "../../../lib/slices/checkoutSlice";
+import { clearCart } from "../../../lib/slices/cartSlice";
+import { checkoutApi } from "../../../lib/api/checkoutApi";
+import { useAlert } from "../../../lib/hooks/useAlert";
 
 export default function PaymentMethod() {
   const dispatch = useAppDispatch();

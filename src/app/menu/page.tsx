@@ -1,18 +1,20 @@
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAppSelector, useAppDispatch } from "../lib/hooks";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import {
   fetchMenu,
   setSelectedCategory,
   setSearchQuery,
   clearFilters,
-} from "../lib/slices/menuSlice";
-import { addToCart } from "../lib/slices/cartSlice";
-import { useAlert } from "../lib/hooks/useAlert";
+} from "../../lib/slices/menuSlice";
+import { addToCart } from "../../lib/slices/cartSlice";
+import { useAlert } from "../../lib/hooks/useAlert";
 import { useFlyingItems } from "../components/Animation/FlyingItemsProvider";
-import { MenuItem } from "../types";
-import { getCartIconPosition } from "../components/CartIcon"; // Fixed import
+import { MenuItem } from "../../types";
+import { getCartIconPosition } from "../components/CartIcon";
 
 export default function Menu() {
   const router = useRouter();
@@ -59,6 +61,10 @@ export default function Menu() {
       item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.ingredients.some((ingredient) =>
         ingredient.toLowerCase().includes(searchQuery.toLowerCase())
+      ) ||
+      // Add tag search for enhanced API
+      (item as any).tags?.some((tag: string) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
       );
     return matchesCategory && matchesSearch;
   });
@@ -113,6 +119,21 @@ export default function Menu() {
 
   const getStarRating = (rating: number) => {
     return "⭐".repeat(Math.floor(rating)) + "☆".repeat(5 - Math.floor(rating));
+  };
+
+  // Helper function to check if item has deals
+  const hasDeals = (item: MenuItem) => {
+    return (item as any).deals?.length > 0;
+  };
+
+  // Helper function to check if it's chef recommendation
+  const isChefRecommendation = (item: MenuItem) => {
+    return (item as any).chefRecommendation;
+  };
+
+  // Helper function to check if it's seasonal
+  const isSeasonal = (item: MenuItem) => {
+    return (item as any).seasonal;
   };
 
   if (loading) {
@@ -240,6 +261,7 @@ export default function Menu() {
             const currentImageIndex = selectedImageIndex[item.id] || 0;
             const currentImage = item.images?.[currentImageIndex] || item.image;
             const isHovered = hoveredItem === item.id;
+            const enhancedItem = item as any; // Cast to access enhanced properties
 
             return (
               <div
@@ -262,6 +284,25 @@ export default function Menu() {
                 >
                   {/* Hover Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+
+                  {/* Enhanced Badges */}
+                  <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
+                    {isChefRecommendation(item) && (
+                      <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
+                        👨‍🍳 Chef's Pick
+                      </span>
+                    )}
+                    {isSeasonal(item) && (
+                      <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
+                        🍂 Seasonal
+                      </span>
+                    )}
+                    {hasDeals(item) && (
+                      <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
+                        🎁 Deal
+                      </span>
+                    )}
+                  </div>
 
                   {/* Floating Elements */}
                   <div className="absolute -top-2 -right-2 w-6 h-6 bg-theme-accent rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 delay-200 transform group-hover:scale-150"></div>
@@ -295,19 +336,23 @@ export default function Menu() {
                     </div>
 
                     {/* Image Indicator Dots */}
-                    <div className="absolute bottom-3 left-3 flex space-x-1 backdrop-blur-sm bg-black/50 rounded-full px-2 py-1">
-                      {[0, 1, 2].map((dotIndex) => (
-                        <button
-                          key={dotIndex}
-                          onClick={(e) => handleDotClick(item.id, dotIndex, e)}
-                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                            currentImageIndex === dotIndex
-                              ? "bg-white scale-125"
-                              : "bg-white/60 hover:bg-white/80"
-                          }`}
-                        />
-                      ))}
-                    </div>
+                    {item.images && item.images.length > 1 && (
+                      <div className="absolute bottom-3 left-3 flex space-x-1 backdrop-blur-sm bg-black/50 rounded-full px-2 py-1">
+                        {item.images.slice(0, 3).map((_, dotIndex) => (
+                          <button
+                            key={dotIndex}
+                            onClick={(e) =>
+                              handleDotClick(item.id, dotIndex, e)
+                            }
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                              currentImageIndex === dotIndex
+                                ? "bg-white scale-125"
+                                : "bg-white/60 hover:bg-white/80"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
 
                     {/* Rating Badge */}
                     <div className="absolute top-3 right-3 bg-black/70 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
@@ -316,7 +361,7 @@ export default function Menu() {
 
                     {/* Spice Level Badge */}
                     {item.spiceLevel > 0 && (
-                      <div className="absolute top-3 left-3 bg-red-500/90 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
+                      <div className="absolute top-12 right-3 bg-red-500/90 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm transform group-hover:scale-110 transition-transform duration-300">
                         {getSpiceLevel(item.spiceLevel)}
                       </div>
                     )}
@@ -345,9 +390,12 @@ export default function Menu() {
                     </button>
 
                     {/* Image Counter */}
-                    <div className="absolute top-3 left-12 bg-black/50 text-white px-2 py-1 rounded-full text-xs backdrop-blur-sm">
-                      {currentImageIndex + 1}/3
-                    </div>
+                    {item.images && item.images.length > 1 && (
+                      <div className="absolute top-3 left-12 bg-black/50 text-white px-2 py-1 rounded-full text-xs backdrop-blur-sm">
+                        {currentImageIndex + 1}/
+                        {Math.min(item.images.length, 3)}
+                      </div>
+                    )}
                   </div>
 
                   {/* Item Details */}
@@ -361,9 +409,30 @@ export default function Menu() {
                       </span>
                     </div>
 
-                    <p className="opacity-80 text-sm leading-relaxed transition-all duration-300 group-hover:opacity-100">
+                    <p className="opacity-80 text-sm leading-relaxed transition-all duration-300 group-hover:opacity-100 line-clamp-2">
                       {item.description}
                     </p>
+
+                    {/* Enhanced Tags */}
+                    {enhancedItem.tags && enhancedItem.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {enhancedItem.tags
+                          .slice(0, 3)
+                          .map((tag: string, idx: number) => (
+                            <span
+                              key={idx}
+                              className="bg-white/20 dark:bg-gray-700/50 px-2 py-1 rounded-full text-xs backdrop-blur-sm"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        {enhancedItem.tags.length > 3 && (
+                          <span className="text-xs opacity-70">
+                            +{enhancedItem.tags.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     <div className="text-xs opacity-70 space-y-1 transition-all duration-300 group-hover:opacity-90">
                       <p className="flex items-center space-x-1">

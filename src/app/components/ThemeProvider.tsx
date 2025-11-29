@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { useAppSelector } from "../lib/hooks";
+import { useAppSelector } from "../../store/hooks";
 
 export default function ThemeProvider({
   children,

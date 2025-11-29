@@ -1,6 +1,6 @@
 "use client";
-import { useAppDispatch, useAppSelector } from "../../lib/hooks";
-import { setThemeMode } from "../../lib/slices/themeSlice";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { setThemeMode } from "../../../lib/slices/themeSlice";
 
 export default function ThemeModeToggle() {
   const dispatch = useAppDispatch();

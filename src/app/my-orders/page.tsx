@@ -1,8 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 import { useState, useEffect } from "react";
-import { customerApi } from "../lib/api/customerApi";
-import { OrderHistory } from "../types";
+import { customerApi } from "../../lib/api/customerApi";
+import { OrderHistory } from "../../types";
 
 export default function MyOrdersPage() {
   const [orders, setOrders] = useState<OrderHistory[]>([]);

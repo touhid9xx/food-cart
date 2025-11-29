@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins, Montserrat } from "next/font/google";
 import "./globals.css";
-import StoreProvider from "./store/provider";
+import StoreProvider from "../store/provider";
 import ThemeProvider from "./components/ThemeProvider";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";

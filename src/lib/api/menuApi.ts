@@ -419,7 +419,7 @@ export const menuItemReviews: { [key: string]: MenuItemReview[] } = {
 };
 
 // Enhanced API Service functions
-export const enhancedMenuApi = {
+export const menuApi = {
   // Fetch all menu items with categories
   fetchMenu: async (): Promise<MenuResponse> => {
     await delay(1000);

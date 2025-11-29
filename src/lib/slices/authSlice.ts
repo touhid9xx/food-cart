@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { AuthState, User, LoginCredentials, RegisterData } from "../../types";
+import {
+  AuthState,
+  User,
+  LoginCredentials,
+  RegisterData,
+} from "../../types";
 import { authApi } from "../api/authApi";
 
 const initialState: AuthState = {

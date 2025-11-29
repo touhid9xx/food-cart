@@ -1,8 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 import { useRouter } from "next/navigation";
-import { useAppSelector, useAppDispatch } from "../../lib/hooks";
-import { resetCheckout } from "../../lib/slices/checkoutSlice";
+import { useAppSelector, useAppDispatch } from "../../../store/hooks";
+import { resetCheckout } from "../../../lib/slices/checkoutSlice";
 
 export default function OrderConfirmation() {
   const router = useRouter();
