@@ -1,10 +1,11 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useState, useEffect } from "react";
 import { useAlert } from "../../../lib/hooks/useAlert";
 import { MenuItemDetails } from "../../../types";
-import { enhancedMenuItems } from "../../../lib/api/menuApi";
+import { menuApi } from "../../../lib/api/menuApi";
 import ImagePreviewModal from "./ImagePreviewModal";
 
 interface MenuItemListProps {
@@ -30,13 +31,13 @@ export default function MenuItemList({
   const loadItems = async () => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setItems(enhancedMenuItems);
+      // Use the menuApi to fetch items
+      const menuResponse = await menuApi.fetchMenu();
+      setItems(menuResponse.items);
 
       // Debug: Check image data structure
-      console.log("Menu items loaded:", enhancedMenuItems);
-      enhancedMenuItems.forEach((item, index) => {
+      console.log("Menu items loaded:", menuResponse.items);
+      menuResponse.items.forEach((item, index) => {
         console.log(`Item ${index}:`, {
           name: item.name,
           image: item.image,
@@ -46,6 +47,7 @@ export default function MenuItemList({
         });
       });
     } catch (err) {
+      console.error("Failed to load menu items:", err);
       error("Failed to load menu items", "Error");
     } finally {
       setLoading(false);
@@ -58,11 +60,12 @@ export default function MenuItemList({
     }
 
     try {
-      // Simulate API call
+      // Simulate API call - in a real app, you'd call menuApi.deleteMenuItem(itemId)
       await new Promise((resolve) => setTimeout(resolve, 500));
       setItems((prev) => prev.filter((item) => item.id !== itemId));
       success("Menu item deleted successfully", "Deleted");
     } catch (err) {
+      console.error("Failed to delete menu item:", err);
       error("Failed to delete menu item", "Error");
     }
   };
@@ -84,6 +87,7 @@ export default function MenuItemList({
         "Status Updated"
       );
     } catch (err) {
+      console.error("Failed to update item status:", err);
       error("Failed to update item status", "Error");
     }
   };
@@ -95,7 +99,7 @@ export default function MenuItemList({
         ? item.images
         : item.image
         ? [item.image]
-        : ["/api/placeholder/150/150"]; // Fallback placeholder
+        : ["/images/placeholder-food.jpg"]; // Fallback placeholder
 
     console.log("Preview images for", item.name, ":", imagesToShow);
     setSelectedItemImages(imagesToShow);
@@ -114,7 +118,7 @@ export default function MenuItemList({
       return item.image;
     }
     // Fallback placeholder
-    return "/api/placeholder/80/80";
+    return "/images/placeholder-food.jpg";
   };
 
   // Get all images for a menu item
@@ -125,7 +129,7 @@ export default function MenuItemList({
     if (item.image) {
       return [item.image];
     }
-    return ["/api/placeholder/150/150"];
+    return ["/images/placeholder-food.jpg"];
   };
 
   const filteredItems = items.filter(
@@ -196,7 +200,9 @@ export default function MenuItemList({
         {filteredItems.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🍕</div>
-            <h3 className="text-xl font-semibold mb-2">No menu items found</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              {searchTerm ? "No menu items found" : "No menu items yet"}
+            </h3>
             <p className="opacity-80">
               {searchTerm
                 ? "Try adjusting your search criteria"
@@ -230,15 +236,9 @@ export default function MenuItemList({
                             onError={(e) => {
                               // Fallback if image fails to load
                               e.currentTarget.src =
-                                "https://via.placeholder.com/80/cccccc/969696?text=No+Image";
+                                "/images/placeholder-food.jpg";
                               e.currentTarget.alt = "Image not available";
                             }}
-                            onLoad={() =>
-                              console.log(`Image loaded: ${item.name}`)
-                            }
-                            onErrorCapture={() =>
-                              console.log(`Image failed: ${item.name}`)
-                            }
                           />
                           {/* Preview Overlay */}
                           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
@@ -331,7 +331,7 @@ export default function MenuItemList({
                             🍂
                           </span>
                         )}
-                        {item.deals.length > 0 && (
+                        {item.deals && item.deals.length > 0 && (
                           <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
                             🎁
                           </span>
@@ -363,7 +363,7 @@ export default function MenuItemList({
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 e.currentTarget.src =
-                                  "https://via.placeholder.com/50/cccccc/969696?text=Img";
+                                  "/images/placeholder-food.jpg";
                               }}
                             />
                           </button>

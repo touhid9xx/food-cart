@@ -1,143 +1,119 @@
-// Theme Types
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// types/index.ts
+// ========= THEME ==============
 export interface ThemeState {
   mode: "light" | "dark";
   color: "blue" | "green" | "purple";
 }
 
-// Menu Types
-export interface MenuItem {
+// ========== COMMON TYPES ==========
+export type AlertType = "success" | "error" | "warning" | "info";
+
+export type UserRole = "customer" | "admin" | "staff";
+
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "preparing"
+  | "ready"
+  | "out_for_delivery"
+  | "delivered"
+  | "cancelled";
+
+export type PaymentStatus =
+  | "pending"
+  | "paid"
+  | "failed"
+  | "refunded"
+  | "partially_refunded";
+
+// ========== ALERT & NOTIFICATION TYPES ==========
+export interface Alert {
   id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  images: string[];
-  category: string;
-  ingredients: string[];
-  isAvailable: boolean;
-  preparationTime: number;
-  rating: number;
-  spiceLevel: 0 | 1 | 2 | 3;
-  dietaryInfo?: DietaryInfo;
+  type: AlertType;
+  title: string;
+  message: string;
+  duration?: number;
+  dismissible?: boolean;
 }
 
-export interface MenuItemDetails extends MenuItem {
-  nutritionalInfo?: NutritionalInfo;
-  allergens: string[];
-  cookingInstructions?: string;
-  servingSize: string;
-  customizationOptions: CustomizationOption[];
-  deals: Deal[];
-  relatedItems: string[];
-  popularityScore: number;
-  tags: string[];
-  chefRecommendation: boolean;
-  seasonal: boolean;
-}
-
-export interface NutritionalInfo {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  sugar: number;
-  sodium: number;
-}
-
-export interface CustomizationOption {
+export interface Notification {
   id: string;
-  name: string;
-  type: "radio" | "checkbox" | "number";
-  options: CustomizationChoice[];
-  required: boolean;
-  maxSelections?: number;
-}
-
-export interface CustomizationChoice {
-  id: string;
-  name: string;
-  price: number;
-  available: boolean;
-}
-
-export interface Deal {
-  id: string;
-  name: string;
-  type: "percentage" | "fixed" | "bogo" | "combo";
-  value: number;
-  description: string;
-  validUntil?: string;
-  minOrderAmount?: number;
-  applicableItems: string[];
-}
-
-export interface DietaryInfo {
-  isVegetarian: boolean;
-  isVegan: boolean;
-  isGlutenFree: boolean;
-  isDairyFree: boolean;
-  isNutFree: boolean;
-  calories?: number;
-  allergens: string[];
-}
-
-export interface MenuResponse {
-  categories: string[];
-  items: MenuItem[];
-}
-
-export interface MenuItemReview {
-  id: string;
-  userId: string;
-  userName: string;
-  userAvatar?: string;
-  rating: number;
-  comment: string;
+  type: AlertType;
+  title: string;
+  message: string;
+  read: boolean;
   createdAt: string;
-  helpful: number;
-  images?: string[];
-  verifiedPurchase: boolean;
+  actionUrl?: string;
+  actionLabel?: string;
 }
 
-// Cart Types
-export interface CartItem {
+// ========== AUTH TYPES ==========
+export interface User {
   id: string;
-  menuItemId: string;
+  email: string;
   name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  specialInstructions?: string;
-  dietaryRequirements?: string;
+  role: UserRole;
+  avatar?: string;
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
 }
 
-export interface CartState {
-  items: CartItem[];
-  total: number;
-  itemCount: number;
-  isOpen: boolean;
+export interface LoginCredentials {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
 }
 
-// Order Types
-export interface Order {
-  id: string;
-  items: CartItem[];
-  total: number;
-  status:
-    | "pending"
-    | "confirmed"
-    | "preparing"
-    | "ready"
-    | "delivered"
-    | "cancelled";
-  createdAt: string;
-  estimatedDelivery: string;
-  deliveryInstructions?: string;
-  specialRequirements?: string;
+export interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  acceptTerms?: boolean;
 }
 
-// Customer Types
+export interface AuthResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+// ========== API RESPONSE TYPES ==========
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data: T;
+  message: string;
+  error?: string;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+// ========== CUSTOMER TYPES ==========
+export interface CustomerPreferences {
+  notifications: {
+    email: boolean;
+    sms: boolean;
+    push: boolean;
+  };
+  dietary: string[];
+  favoriteCuisines: string[];
+  spicePreference: "mild" | "medium" | "hot" | "extra-hot";
+  deliveryInstructions: string;
+  specialRequirements: string;
+  cutleryPreference: "include" | "do_not_include";
+  contactlessDelivery: boolean;
+}
+
 export interface CustomerAddress {
   id: string;
   type: "home" | "work" | "other";
@@ -155,11 +131,10 @@ export interface CustomerAddress {
 
 export interface PaymentMethod {
   id: string;
-  type: "cash" | "card" | "digital_wallet";
-  isDefault: boolean;
-  cardLastFour?: string;
-  cardType?: "visa" | "mastercard" | "amex";
+  type: "card" | "digital_wallet" | "cash";
+  lastFour?: string;
   expiryDate?: string;
+  isDefault: boolean;
   customerId?: string;
 }
 
@@ -170,79 +145,10 @@ export interface CustomerReview {
   rating: number;
   comment: string;
   createdAt: string;
-  images?: string[];
+  images: string[];
   helpful: number;
   dietaryComment?: string;
   customerId?: string;
-}
-
-export interface CustomerPreferences {
-  notifications: {
-    email: boolean;
-    sms: boolean;
-    push: boolean;
-  };
-  dietary: string[];
-  favoriteCuisines: string[];
-  spicePreference: "mild" | "medium" | "hot" | "extra_hot";
-  deliveryInstructions?: string;
-  specialRequirements?: string;
-  cutleryPreference: "include" | "do_not_include" | "ask_each_time";
-  contactlessDelivery: boolean;
-}
-
-export interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  avatar?: string;
-  isEmailVerified: boolean;
-  isPhoneVerified: boolean;
-  preferences: CustomerPreferences;
-  addresses: CustomerAddress[];
-  paymentMethods: PaymentMethod[];
-  reviews: CustomerReview[];
-  loyaltyPoints: number;
-  joinedDate: string;
-  lastOrderDate?: string;
-  dietaryRestrictions?: string[];
-}
-
-export interface OrderHistory {
-  id: string;
-  orderNumber: string;
-  items: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-    image: string;
-    specialInstructions?: string;
-    dietaryRequirements?: string;
-  }>;
-  total: number;
-  status: "completed" | "cancelled" | "refunded";
-  orderDate: string;
-  deliveryAddress: CustomerAddress;
-  restaurant: {
-    id: string;
-    name: string;
-    image: string;
-  };
-  deliveryInstructions?: string;
-  specialRequirements?: string;
-  rating?: number;
-  review?: string;
-  customerId: string;
-}
-
-// Delivery Types
-export interface DeliveryInstruction {
-  id: string;
-  type: "leave_at_door" | "hand_to_me" | "leave_with_neighbor" | "other";
-  message: string;
-  isDefault: boolean;
 }
 
 export interface DietaryRestriction {
@@ -250,198 +156,278 @@ export interface DietaryRestriction {
   type: "allergy" | "intolerance" | "preference" | "religious";
   name: string;
   severity: "mild" | "moderate" | "severe";
-  description?: string;
-}
-
-// Auth Types
-export interface AuthState {
-  user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: "customer" | "admin" | "staff";
-  avatar?: string;
-  isEmailVerified: boolean;
-  isPhoneVerified: boolean;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-}
-
-export interface AuthResponse {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface RefreshTokenResponse {
-  accessToken: string;
-  refreshToken: string;
-}
-
-// API Response Types
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-}
-
-// Restaurant Types
-export interface Restaurant {
-  id: string;
-  name: string;
   description: string;
-  image: string;
-  rating: number;
-  deliveryTime: string;
-  minimumOrder: number;
-  deliveryFee: number;
-  isOpen: boolean;
-  dietaryOptions: {
-    vegetarian: boolean;
-    vegan: boolean;
-    glutenFree: boolean;
-  };
 }
 
-// Notification Types
-export interface Notification {
+export interface DeliveryInstruction {
   id: string;
-  type: "order_update" | "promotion" | "system" | "review_reminder";
-  title: string;
+  type: string;
   message: string;
-  isRead: boolean;
-  createdAt: string;
-  orderId?: string;
+  isDefault: boolean;
 }
 
-// Alert Types
-export type AlertType = "success" | "error" | "warning" | "info";
+export interface Customer extends User {
+  phone?: string;
+  preferences: CustomerPreferences;
+  addresses: CustomerAddress[];
+  paymentMethods: PaymentMethod[];
+  reviews: CustomerReview[];
+  dietaryRestrictions: string[];
+  loyaltyPoints: number;
+  joinedDate: string;
+  lastOrderDate: string;
+}
 
-export interface Alert {
+// ========== ORDER TYPES ==========
+export interface OrderItem {
   id: string;
-  type: AlertType;
-  title?: string;
-  message: string;
-  duration?: number;
-  timestamp: number;
+  name: string;
+  quantity: number;
+  price: number;
+  image?: string;
+  specialInstructions?: string;
+  dietaryRequirements?: string;
 }
 
-export interface AlertState {
-  alerts: Alert[];
-  position:
-    | "top-right"
-    | "top-left"
-    | "bottom-right"
-    | "bottom-left"
-    | "top-center"
-    | "bottom-center";
-  maxAlerts: number;
+export interface RestaurantInfo {
+  id: string;
+  name: string;
+  image?: string;
+  phone?: string;
 }
 
-
-// Add these to your existing types
-
-export interface CheckoutState {
-  step: 'cart' | 'details' | 'payment' | 'confirmation';
-  shippingAddress: {
-    fullName: string;
-    address: string;
-    city: string;
-    postalCode: string;
-    phone: string;
-    instructions: string;
-  };
-  paymentMethod: 'cash' | 'card' | null;
-  cardDetails: {
-    number: string;
-    expiry: string;
-    cvv: string;
-    name: string;
-  };
-  orderId: string | null;
-  isLoading: boolean;
+export interface DeliveryDriver {
+  id: string;
+  name: string;
+  phone: string;
+  avatar?: string;
+  rating?: number;
 }
 
-// Add these Order Summary types to your existing types file
-
-// Order Summary Types for Dashboard
 export interface OrderSummary {
   id: string;
   orderNumber: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
-  items: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
+  items: OrderItem[];
   total: number;
-  status: "pending" | "confirmed" | "preparing" | "ready" | "out_for_delivery" | "delivered" | "cancelled";
+  status: OrderStatus;
   orderDate: string;
-  estimatedDelivery: string;
+  estimatedDelivery?: string;
   deliveryAddress: {
     street: string;
     city: string;
     state: string;
     zipCode: string;
+    country?: string;
   };
-  paymentMethod: "cash" | "card" | "digital_wallet";
-  paymentStatus: "pending" | "paid" | "failed" | "refunded";
+  paymentMethod: string;
+  paymentStatus: PaymentStatus;
   specialInstructions?: string;
   dietaryRequirements?: string;
-  restaurant: {
-    id: string;
-    name: string;
-  };
-  deliveryDriver?: {
-    id: string;
-    name: string;
-    phone: string;
-  };
+  restaurant: RestaurantInfo;
+  deliveryDriver?: DeliveryDriver;
+  customerId?: string;
 }
 
-export interface OrderSummaryState {
-  orders: OrderSummary[];
-  filteredOrders: OrderSummary[];
-  loading: boolean;
-  error: string | null;
-  searchTerm: string;
-  dateFilter: {
-    startDate: string | null;
-    endDate: string | null;
-  };
-  statusFilter: string | null;
+export interface OrderHistory extends OrderSummary {
+  rating?: number;
+  review?: string;
+  deliveryInstructions: string;
+  specialRequirements: string;
 }
 
 export interface OrderSearchCriteria {
   searchTerm?: string;
-  startDate?: string;
-  endDate?: string;
-  status?: string;
   customerName?: string;
   orderId?: string;
+  status?: OrderStatus;
+  startDate?: string;
+  endDate?: string;
+  restaurantId?: string;
 }
 
-export interface UpdateOrderStatusPayload {
-  orderId: string;
-  status: OrderSummary["status"];
+// ========== MENU TYPES ==========
+export interface NutritionalInfo {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  sugar: number;
+  sodium: number;
+}
+
+export interface CustomizationOption {
+  id: string;
+  name: string;
+  type: "radio" | "checkbox" | "select";
+  required: boolean;
+  options: {
+    id: string;
+    name: string;
+    price: number;
+    available: boolean;
+  }[];
+}
+
+export interface Deal {
+  id: string;
+  name: string;
+  type: "percentage" | "fixed" | "bogo";
+  value: number;
+  description: string;
+  validUntil: string;
+  minOrderAmount?: number;
+  applicableItems: string[];
+}
+
+export interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  isAvailable: boolean;
+  preparationTime: number;
+  rating: number;
+  spiceLevel: number;
+}
+
+export interface MenuItemDetails extends MenuItem {
+  images: string[];
+  ingredients: string[];
+  nutritionalInfo: NutritionalInfo;
+  allergens: string[];
+  servingSize: string;
+  cookingInstructions: string;
+  customizationOptions: CustomizationOption[];
+  deals: Deal[];
+  relatedItems: string[];
+  popularityScore: number;
+  tags: string[];
+  chefRecommendation: boolean;
+  seasonal: boolean;
+}
+
+export interface MenuItemReview {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  helpful: number;
+  verifiedPurchase: boolean;
+}
+
+export interface MenuResponse {
+  categories: string[];
+  items: MenuItemDetails[];
+}
+
+// ========== FORM & VALIDATION TYPES ==========
+export interface FormField {
+  name: string;
+  label: string;
+  type:
+    | "text"
+    | "email"
+    | "password"
+    | "number"
+    | "tel"
+    | "textarea"
+    | "select";
+  required?: boolean;
+  placeholder?: string;
+  validation?: {
+    pattern?: RegExp;
+    minLength?: number;
+    maxLength?: number;
+    custom?: (value: any) => string | null;
+  };
+  options?: { value: string; label: string }[];
+}
+
+export interface FormError {
+  field: string;
+  message: string;
+}
+
+// ========== DASHBOARD & ANALYTICS TYPES ==========
+export interface DashboardStats {
+  totalOrders: number;
+  totalRevenue: number;
+  activeCustomers: number;
+  pendingOrders: number;
+  completedOrders: number;
+  averageOrderValue: number;
+}
+
+export interface RevenueData {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface PopularItem {
+  id: string;
+  name: string;
+  orders: number;
+  revenue: number;
+  rating: number;
+}
+
+// ========== SETTINGS TYPES ==========
+export interface AppSettings {
+  theme: "light" | "dark" | "auto";
+  language: string;
+  notifications: {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+  };
+  privacy: {
+    profileVisibility: "public" | "private";
+    dataSharing: boolean;
+  };
+}
+
+// ========== FILE UPLOAD TYPES ==========
+export interface UploadedFile {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  uploadedAt: string;
+}
+
+// ========== SEARCH & FILTER TYPES ==========
+export interface SearchFilters {
+  query?: string;
+  category?: string;
+  priceRange?: {
+    min: number;
+    max: number;
+  };
+  rating?: number;
+  dietary?: string[];
+  sortBy?: "name" | "price" | "rating" | "popularity";
+  sortOrder?: "asc" | "desc";
+}
+
+// ========== PAGINATION TYPES ==========
+export interface PaginationParams {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+  pagination: PaginationParams;
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAppSelector, useAppDispatch } from "../../lib/hooks";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { closeCart } from "../../lib/slices/cartSlice";
 import { setCheckoutStep } from "../../lib/slices/checkoutSlice";
 import CartReview from "../components/Checkout/CartReview";
