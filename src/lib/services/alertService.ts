@@ -1,4 +1,4 @@
-import { store } from "../redux";
+import { store } from "../../store/redux";
 import {
   addAlert,
   removeAlert,

@@ -4,10 +4,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAppDispatch, useAppSelector } from "../lib/hooks";
-import { loginUser } from "../lib/slices/authSlice";
-import { useAlert } from "../lib/hooks/useAlert";
-import { authApi } from "../lib/api/authApi";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { loginUser } from "../../lib/slices/authSlice";
+import { useAlert } from "../../lib/hooks/useAlert";
+import { authApi } from "../../lib/api/authApi";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

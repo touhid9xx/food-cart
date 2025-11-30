@@ -1,6 +1,6 @@
 "use client";
-import { useAppDispatch, useAppSelector } from "../../lib/hooks";
-import { setThemeColor } from "../../lib/slices/themeSlice";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { setThemeColor } from "../../../lib/slices/themeSlice";
 
 export default function ThemeColorSelector() {
   const dispatch = useAppDispatch();

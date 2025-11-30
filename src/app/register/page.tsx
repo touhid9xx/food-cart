@@ -4,9 +4,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAppDispatch, useAppSelector } from "../lib/hooks";
-import { registerUser } from "../lib/slices/authSlice";
-import { useAlert } from "../lib/hooks/useAlert";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { registerUser } from "../../lib/slices/authSlice";
+import { useAlert } from "../../lib/hooks/useAlert";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({

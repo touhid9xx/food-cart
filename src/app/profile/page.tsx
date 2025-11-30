@@ -1,8 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 import { useState, useEffect } from "react";
-import { customerApi } from "../lib/api/customerApi";
-import { Customer, CustomerPreferences } from "../types";
+import { customerApi } from "../../lib/api/customerApi";
+import { Customer, CustomerPreferences } from "../../types";
 
 export default function ProfilePage() {
   const [customer, setCustomer] = useState<Customer | null>(null);

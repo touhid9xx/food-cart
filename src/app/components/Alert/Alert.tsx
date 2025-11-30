@@ -1,5 +1,5 @@
 "use client";
-import { Alert as AlertType } from "../../types";
+import { Alert as AlertType } from "../../../types";
 
 interface AlertProps {
   alert: AlertType;

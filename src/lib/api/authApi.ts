@@ -6,53 +6,12 @@ import {
   RefreshTokenResponse,
   User,
   ApiResponse,
+  UserRole,
 } from "../../types";
+import { fakeUsers, fakeTokenStorage } from "../data";
 
 // Fake API delay simulation
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// Fake user database with passwords
-interface UserWithPassword extends User {
-  password: string;
-}
-
-const fakeUsers: UserWithPassword[] = [
-  {
-    id: "user_1",
-    email: "john@tushar.com",
-    name: "John Smith",
-    role: "customer",
-    avatar: "/images/avatars/john.jpg",
-    isEmailVerified: true,
-    isPhoneVerified: true,
-    password: "password123", // Store password for verification
-  },
-  {
-    id: "user_2",
-    email: "sarah@tushar.com",
-    name: "Sarah Johnson",
-    role: "customer",
-    avatar: "/images/avatars/sarah.jpg",
-    isEmailVerified: true,
-    isPhoneVerified: false,
-    password: "password123",
-  },
-  {
-    id: "admin_1",
-    email: "admin@tushar.com",
-    name: "System Admin",
-    role: "admin",
-    isEmailVerified: true,
-    isPhoneVerified: true,
-    password: "admin123",
-  },
-];
-
-// Fake token storage (in real app, this would be in HTTP-only cookies)
-const fakeTokenStorage = {
-  accessToken: null as string | null,
-  refreshToken: null as string | null,
-};
 
 // Helper functions to manage token storage
 const TokenManager = {
@@ -136,6 +95,22 @@ const verifyPassword = (
   return inputPassword === storedPassword;
 };
 
+// Helper function to create properly typed users
+const createUserWithPassword = (
+  userData: Omit<(typeof fakeUsers)[0], "id"> & { id?: string }
+): (typeof fakeUsers)[0] => {
+  return {
+    id: userData.id || `user_${Date.now()}`,
+    email: userData.email,
+    name: userData.name,
+    role: userData.role,
+    avatar: userData.avatar,
+    isEmailVerified: userData.isEmailVerified,
+    isPhoneVerified: userData.isPhoneVerified,
+    password: userData.password,
+  };
+};
+
 export const authApi = {
   // Login user
   login: async (
@@ -202,15 +177,15 @@ export const authApi = {
       throw new Error("User already exists with this email");
     }
 
-    const newUserWithPassword: UserWithPassword = {
-      id: `user_${Date.now()}`,
+    // Create properly typed new user
+    const newUserWithPassword = createUserWithPassword({
       email: userData.email,
       name: userData.name,
       role: "customer",
       isEmailVerified: false,
       isPhoneVerified: false,
-      password: userData.password, // Store the provided password
-    };
+      password: userData.password,
+    });
 
     fakeUsers.push(newUserWithPassword);
 
@@ -371,15 +346,14 @@ export const authApi = {
 
   // Get demo accounts info (for the login page)
   getDemoAccounts: async (): Promise<
-    ApiResponse<Array<{ email: string; role: string; password: string }>>
+    ApiResponse<Array<{ email: string; role: UserRole; password: string }>>
   > => {
     await delay(200);
 
     const demoAccounts = fakeUsers
       .filter(
         (user) =>
-          user.email === "john.smith@email.com" ||
-          user.email === "admin@foodorder.com"
+          user.email === "john@tushar.com" || user.email === "admin@tushar.com"
       )
       .map((user) => ({
         email: user.email,
@@ -397,10 +371,24 @@ export const authApi = {
   // Verify email
   verifyEmail: async (token: string): Promise<ApiResponse<boolean>> => {
     await delay(800);
+
+    // In a real app, you would verify the token and update the user
+    const emailFromToken = atob(token); // Simple decoding for demo
+    const user = fakeUsers.find((u) => u.email === emailFromToken);
+
+    if (user) {
+      user.isEmailVerified = true;
+      return {
+        success: true,
+        data: true,
+        message: "Email verified successfully",
+      };
+    }
+
     return {
-      success: true,
-      data: true,
-      message: "Email verified successfully",
+      success: false,
+      data: false,
+      message: "Invalid verification token",
     };
   },
 
@@ -432,10 +420,24 @@ export const authApi = {
     newPassword: string
   ): Promise<ApiResponse<boolean>> => {
     await delay(700);
+
+    // In a real app, you would verify the reset token
+    const emailFromToken = atob(token); // Simple decoding for demo
+    const user = fakeUsers.find((u) => u.email === emailFromToken);
+
+    if (user) {
+      user.password = newPassword;
+      return {
+        success: true,
+        data: true,
+        message: "Password reset successfully",
+      };
+    }
+
     return {
-      success: true,
-      data: true,
-      message: "Password reset successfully",
+      success: false,
+      data: false,
+      message: "Invalid reset token",
     };
   },
 
@@ -458,5 +460,82 @@ export const authApi = {
       accessToken: TokenManager.getAccessToken(),
       refreshToken: TokenManager.getRefreshToken(),
     };
+  },
+
+  // Update user profile
+  updateProfile: async (updates: Partial<User>): Promise<ApiResponse<User>> => {
+    await delay(600);
+
+    const accessToken = TokenManager.getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token");
+    }
+
+    try {
+      const payload = verifyToken(accessToken);
+      const userIndex = fakeUsers.findIndex((u) => u.id === payload.userId);
+
+      if (userIndex === -1) {
+        throw new Error("User not found");
+      }
+
+      // Update user data
+      fakeUsers[userIndex] = {
+        ...fakeUsers[userIndex],
+        ...updates,
+      };
+
+      // Remove password from returned user object
+      const { password, ...user } = fakeUsers[userIndex];
+
+      return {
+        success: true,
+        data: user,
+        message: "Profile updated successfully",
+      };
+    } catch (error) {
+      throw new Error("Failed to update profile");
+    }
+  },
+
+  // Change password
+  changePassword: async (
+    currentPassword: string,
+    newPassword: string
+  ): Promise<ApiResponse<boolean>> => {
+    await delay(500);
+
+    const accessToken = TokenManager.getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token");
+    }
+
+    try {
+      const payload = verifyToken(accessToken);
+      const user = fakeUsers.find((u) => u.id === payload.userId);
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Verify current password
+      if (!verifyPassword(currentPassword, user.password)) {
+        throw new Error("Current password is incorrect");
+      }
+
+      // Update password
+      user.password = newPassword;
+
+      return {
+        success: true,
+        data: true,
+        message: "Password changed successfully",
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Failed to change password");
+    }
   },
 };

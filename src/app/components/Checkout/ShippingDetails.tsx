@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import { useAppSelector, useAppDispatch } from "../../lib/hooks";
+import { useAppSelector, useAppDispatch } from "../../../store/hooks";
 import {
   updateShippingAddress,
   setCheckoutStep,
-} from "../../lib/slices/checkoutSlice";
+} from "../../../lib/slices/checkoutSlice";
 
 export default function ShippingDetails() {
   const dispatch = useAppDispatch();
